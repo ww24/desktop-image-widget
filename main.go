@@ -39,19 +39,21 @@ func main() {
 	glfw.WindowHint(glfw.ContextVersionMinor, 1)
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.Samples, 8)
 	window, err := glfw.CreateWindow(defaultSize, defaultSize, "image widget", nil, nil)
 	if err != nil {
 		log.Fatalln("failed to create window:", err)
 	}
 
 	window.MakeContextCurrent()
+	helper.NewWindowMoveHandler(window)
+	helper.NewWindowCloseHandler(window, glfw.KeyEscape)
 
 	if err := gl.Init(); err != nil {
 		log.Fatalln("failed to init gl:", err)
 	}
 
-	helper.NewWindowMoveHandler(window)
-	helper.NewWindowCloseHandler(window, glfw.KeyEscape)
+	gl.Enable(gl.MULTISAMPLE)
 
 	if err := programLoop(window); err != nil {
 		log.Fatalln("failed to exec program loop:", err)
