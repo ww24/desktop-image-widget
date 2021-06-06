@@ -30,7 +30,6 @@ import (
 	"errors"
 	"image"
 	"image/draw"
-	"os"
 
 	"github.com/go-gl/gl/v4.1-core/gl"
 )
@@ -102,17 +101,4 @@ func (tex *Texture) SetUniform(uniformLoc int32) error {
 	}
 	gl.Uniform1i(uniformLoc, int32(tex.texUnit-gl.TEXTURE0))
 	return nil
-}
-
-func loadImageFile(file string) (image.Image, error) {
-	infile, err := os.Open(file)
-	if err != nil {
-		return nil, err
-	}
-	defer infile.Close()
-
-	// Decode automatically figures out the type of immage in the file
-	// as long as its image/<type> is imported
-	img, _, err := image.Decode(infile)
-	return img, err
 }
