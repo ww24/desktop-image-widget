@@ -1,8 +1,14 @@
 # desktop-image-widget
 
-Display image on Desktop by GLFW 3.3 and OpenGL 4.1.
+![Test][github-actions-img]
 
-## How to launch
+It displays an image in foreground of desktop with GLFW 3.3 and OpenGL 4.1.
 
-1. Put `image.png` on current directory.
-1. Launch program. (ex. `go run .`)
+## Usage
+
+1. Launch application. (e.g. `go run .`)
+1. Drag and Drop PNG image on window.
+1. Scroll on window to change image scale.
+1. Close application if press Esc key.
+
+[github-actions-img]: https://github.com/ww24/desktop-image-widget/workflows/Test/badge.svg?branch=master

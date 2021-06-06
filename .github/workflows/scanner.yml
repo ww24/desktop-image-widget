@@ -1,0 +1,31 @@
+name: Scanner
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  schedule:
+    - cron: "0 3 * * *" # 12:00 JST every day
+
+jobs:
+  scan:
+    name: Vulnerability scanner
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run Trivy vulnerability scanner in repo mode
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: fs
+          ignore-unfixed: true
+          format: template
+          template: "@/contrib/sarif.tpl"
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: trivy-results.sarif
