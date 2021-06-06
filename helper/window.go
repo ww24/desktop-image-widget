@@ -1,19 +1,39 @@
 package helper
 
-import "github.com/go-gl/glfw/v3.3/glfw"
+import (
+	"log"
+
+	"github.com/go-gl/glfw/v3.3/glfw"
+)
 
 type WindowScaleHandler struct {
 	width  float64
 	height float64
 	scale  float64
+	lock   int
 }
 
 func NewWindowScaleHandler(window *glfw.Window) *WindowScaleHandler {
 	h := &WindowScaleHandler{scale: 1.0}
-	width, height := window.GetSize()
-	h.width, h.height = float64(width), float64(height)
 	window.SetScrollCallback(h.scrollCallback)
 	return h
+}
+
+func (h *WindowScaleHandler) locked() bool {
+	return h.lock < 2
+}
+
+func (h *WindowScaleHandler) tryUnlock() {
+	if h.locked() {
+		h.lock++
+	}
+}
+
+func (h *WindowScaleHandler) Reset(window *glfw.Window) {
+	h.tryUnlock()
+	h.scale = 1.0
+	width, height := window.GetSize()
+	h.width, h.height = float64(width), float64(height)
 }
 
 func (h *WindowScaleHandler) applyScale(w *glfw.Window) {
@@ -29,6 +49,10 @@ func (h *WindowScaleHandler) applyScale(w *glfw.Window) {
 }
 
 func (h *WindowScaleHandler) scrollCallback(w *glfw.Window, xoff, yoff float64) {
+	if h.locked() {
+		return
+	}
+
 	h.scale += yoff / 200
 	if h.scale < .1 {
 		h.scale = .1
@@ -97,5 +121,30 @@ func NewWindowCloseHandler(w *glfw.Window, key glfw.Key) *WindowCloseHandler {
 func (h *WindowCloseHandler) keyCallback(window *glfw.Window, key glfw.Key, scancode int, action glfw.Action, mods glfw.ModifierKey) {
 	if key == h.key && action == glfw.Press {
 		window.SetShouldClose(true)
+	}
+}
+
+type TextureReplacer interface {
+	ReplaceTexture(*glfw.Window, string) error
+}
+
+type WindowDropHandler struct {
+	replacer TextureReplacer
+}
+
+func NewWindowDropHandler(w *glfw.Window, tr TextureReplacer) *WindowDropHandler {
+	h := &WindowDropHandler{
+		replacer: tr,
+	}
+	w.SetDropCallback(h.dropCallback)
+	return h
+}
+
+func (h *WindowDropHandler) dropCallback(w *glfw.Window, names []string) {
+	if len(names) == 0 {
+		return
+	}
+	if err := h.replacer.ReplaceTexture(w, names[0]); err != nil {
+		log.Printf("Error: %v\n", err)
 	}
 }
